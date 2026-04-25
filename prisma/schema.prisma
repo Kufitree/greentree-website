@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Product {
+  id            String      @id @default(cuid())
+  title         String
+  slug          String      @unique
+  type          String      
+  description   String?
+  regularPrice  Int         
+  salePrice     Int?        
+  saleStartAt   DateTime?
+  saleEndAt     DateTime?
+  isActive      Boolean     @default(true)
+  stripePriceId String?     
+  
+  orderItems    OrderItem[]
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  stripeSessionId String      @unique
+  customerEmail   String
+  totalAmount     Int         
+  currency        String      @default("usd")
+  status          String      @default("PENDING") 
+  paidAt          DateTime?
+  createdAt       DateTime    @default(now())
+  
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  productId   String
+  pricePaid   Int      
+  
+  order       Order    @relation(fields: [orderId], references: [id])
+  product     Product  @relation(fields: [productId], references: [id])
+}
